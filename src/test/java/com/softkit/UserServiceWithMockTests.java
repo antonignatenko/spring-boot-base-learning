@@ -37,8 +37,6 @@ public class UserServiceWithMockTests {
     //    mocking all repository calls
     @MockBean
     private UserRepository userRepository;
-
-
     /**
      * this method is mocking call to database, to simulate that user already exists
      * even if database is not set (so we don't have it up and running)
@@ -53,7 +51,7 @@ public class UserServiceWithMockTests {
 
         try {
 //        username must be the same, because of our above rule for mocking
-            userService.signup(new User(null, username, null, null, null));
+//            userService.signup(new User(null, username, null, null, null,null));
         } catch (CustomException e) {
             assertThat(e.getMessage()).isEqualTo("Username is already in use");
             assertThat(e.getHttpStatus()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);

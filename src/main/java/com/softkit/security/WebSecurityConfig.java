@@ -25,8 +25,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-
-
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -50,8 +48,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Entry points
         http.authorizeRequests()
-                .antMatchers("/users/signin").permitAll()
-                .antMatchers("/users/signup").permitAll()
+                .antMatchers(HttpMethod.POST,"/users/signin").permitAll()
+                .antMatchers(HttpMethod.POST,"/users/signup").permitAll()
+                .antMatchers(HttpMethod.POST,"users/refresh").permitAll()
+                .antMatchers(HttpMethod.POST,"/users/activate").permitAll()
                 .antMatchers("/h2-console/**/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Disallow everything else..
@@ -64,10 +64,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
 
         // Optional, if you want to test the API from a browser
-        // http.httpBasic();
+         http.httpBasic().and().formLogin();
     }
 
-    @Override
+    @Override // enables user to access resources
     public void configure(WebSecurity web) throws Exception {
         // Allow swagger to be accessed without authentication
         web.ignoring().antMatchers("/v2/api-docs")//
