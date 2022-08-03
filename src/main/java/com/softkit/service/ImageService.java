@@ -33,8 +33,8 @@ public class ImageService {
 
 
     @SneakyThrows
-    public ImageResponseDTO postImage(UserDataDTO userDataDTO, MultipartFile file, String title) {
-        User userFromDB = userRepository.findByUsername(userDataDTO.getUsername());
+    public ImageResponseDTO postImage(String username, MultipartFile file, String title) {
+        User userFromDB = userRepository.findByUsername(username);
         if (userFromDB == null) {
             throw new UsernameNotFoundException("User with such name wasn't found");
         }
@@ -43,11 +43,14 @@ public class ImageService {
                 + "/" + UUID.randomUUID()
                 + "-" + file.getOriginalFilename();
 
+        userFromDB.setPathToUsersPhoto(path);
+
         Image image = Image.builder()
                 .title(title)
                 .user(userFromDB)
                 .path(path)
                 .build();
+
 
         File storedImage = new File(path);
         storedImage.createNewFile();
@@ -61,13 +64,10 @@ public class ImageService {
         return imageMapper.mapImageToResponse(image);
     }
 
-    public String getImage(Long id) {
-        Image imageFromDB = imageRepository.getImage(id);
-        if (imageFromDB != null) {
-            return imageFromDB.getPath();
-        } else {
-            throw new UsernameNotFoundException("sorry such image wasn't found");
-        }
+    public String getImage(Long userId) {
+        Image image = imageRepository.findById(userId).orElseThrow(() ->
+                new UsernameNotFoundException("sorry such image wasn't found"));
+        return image.getPath();
     }
 }
 

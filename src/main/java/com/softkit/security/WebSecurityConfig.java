@@ -30,7 +30,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedMethods("*").allowedHeaders("*");
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("POST", "PUT", "DELETE")
+                        .allowedHeaders("header1", "header2")
+                        .exposedHeaders("header1", "header2")
+                        .allowCredentials(false).maxAge(3600);
             }
         };
     }
@@ -52,10 +57,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST,"/users/signup").permitAll()
                 .antMatchers(HttpMethod.POST,"users/refresh").permitAll()
                 .antMatchers(HttpMethod.POST,"/users/activate").permitAll()
+                .antMatchers(HttpMethod.GET,"/images/").permitAll()
                 .antMatchers("/h2-console/**/**").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                 // Disallow everything else..
-                .anyRequest().authenticated();
+//                .anyRequest().authenticated();
 
         // If a user try to access a resource without having enough permissions
         http.exceptionHandling().accessDeniedPage("/login");

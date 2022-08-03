@@ -9,11 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,10 +35,12 @@ public class UserService {
     public String signin(String username, String password) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-            User currentUserFromDb = userRepository.findByUsername(username);
-            if (!currentUserFromDb.isActivated()) {
+//            User currentUserFromDb = userRepository.findByUsername(username);
+         /*   if (!currentUserFromDb.isActivated()) {
                 throw new CustomException("Users email wasn't yet activated, please activate your account", HttpStatus.BAD_REQUEST);
             }
+
+          */
             return jwtTokenProvider.createToken(username, userRepository.findByUsername(username).getRoles());
         } catch (AuthenticationException e) {
             throw new CustomException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
@@ -49,9 +54,8 @@ public class UserService {
                 user.setRoles(List.of(Role.ROLE_CLIENT));
             }
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            user.setEmail(user.getEmail().toLowerCase());
-            user.setUsername(user.getUsername());
             user.setUUID(getUUidForUser());
+            user.setRegistrationDate(LocalDateTime.now());
             userRepository.save(user);
             return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
         } else {
@@ -87,7 +91,6 @@ public class UserService {
 
     //  method must create a new access token, similar to login
     public String refresh(String username) {
-//        TODO implement
         User userFromDB = userRepository.findByUsername(username);
         if (userFromDB == null) {
             throw new UsernameNotFoundException("user with such username was not found");
@@ -103,9 +106,21 @@ public class UserService {
         User userFromDB = userRepository.findById(id).get();
         if (userFromDB != null) {
             userFromDB.setActivated(true);
-            userRepository.updateActivationStatus(userFromDB.getId(),userFromDB.isActivated());
+            userRepository.updateActivationStatus(userFromDB.getId(), userFromDB.isActivated());
         } else {
             throw new UsernameNotFoundException("Sorry such user wasnt found ");
+        }
+    }
+
+    public void updateUsersInfo(String userName,String firstName,String lastName) {
+        User userFromDB = userRepository.findByUsername(userName);
+        if (userFromDB != null) {
+            userFromDB.setFirstName(firstName);
+            userFromDB.setLastName(lastName);
+            userRepository.save(userFromDB);
+        }
+        else {
+            throw new UsernameNotFoundException("user with such username have not been found");
         }
     }
 }

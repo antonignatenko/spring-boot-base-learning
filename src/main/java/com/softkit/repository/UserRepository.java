@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByUsername(String username);
+
     @Modifying()
     @Transactional
     @Query("UPDATE users u set u.isActivated =:status WHERE u.id =:id")
@@ -22,6 +23,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByEmail(String email);
 
+
+    @Query("FROM users u LEFT JOIN FETCH u.images where u.username= :username")
     User findByUsername(String username);
+
+    @Query("FROM users u LEFT JOIN FETCH u.images where u.firstName= :firstName")
+    User findByFirstName(String firstName);
 
 }

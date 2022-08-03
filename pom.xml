@@ -48,7 +48,6 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
-			<version>2.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

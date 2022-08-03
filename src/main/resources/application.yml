@@ -1,5 +1,8 @@
 ---
 spring:
+  servlet:
+    multipart:
+      max-file-size: 3MB
   datasource:
     url: 'jdbc:mysql://localhost:3306/softKit'
     username: root
@@ -30,7 +33,7 @@ spring:
         id:
           new_generator_mappings: false
 
-app.nfs.path: "/Users/antonignatenko/Downloads/fileUploads"
+app.nfs.path: "/Users/spartiva/Downloads/fileUploads"
 
 server:
   port: 8085

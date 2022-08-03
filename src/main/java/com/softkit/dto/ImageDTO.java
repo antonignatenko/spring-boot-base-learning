@@ -13,15 +13,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ImageDTO {
 
-
     private String title;
-
 
     private String path;
 
-
     private User user;
-
 
     private LocalDateTime createdDate;
 }

@@ -4,6 +4,8 @@ import com.softkit.dto.EmailDTO;
 import com.softkit.dto.UserDataDTO;
 import com.softkit.dto.UserResponseDTO;
 import com.softkit.mapper.UserMapper;
+import com.softkit.model.Role;
+import com.softkit.model.User;
 import com.softkit.service.EmailSenderService;
 import com.softkit.service.FileUploadService;
 import com.softkit.service.UserService;
@@ -13,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,13 +39,12 @@ public class UserController {
     private FileUploadService uploadService;
 
     @PostMapping("/signin")
-    @ApiOperation(value = "${UserController.signin}")
     @ApiResponses(value = {
             @ApiResponse(code = 400, message = "Something went wrong"),
             @ApiResponse(code = 422, message = "Invalid username/password supplied")})
     public String login(
-            @ApiParam("Username") @RequestParam String username,
-            @ApiParam("Password") @RequestParam String password) {
+            @RequestParam String username,
+            @RequestParam String password) {
         return userService.signin(username, password);
     }
 
@@ -72,28 +76,41 @@ public class UserController {
     }
 
     @DeleteMapping("/deleteByUsername")
-    public void deleteByUsername (@RequestParam String username){
-        userService.delete(username);
+    public void deleteByUsername(@RequestParam String username) {
+        User userFromDb = userService.search(username);
+        if (userFromDb != null && userFromDb.getRoles().equals(Role.ROLE_CLIENT)) {
+            userService.delete(username);
+        }
+        throw new UsernameNotFoundException("user with such name wasn't found");
+
     }
 
     @PostMapping("/sendEmail")
     public void sendEmail(@RequestBody EmailDTO emailDTO) {
-        senderService.sendEmail(emailDTO.getToEmail(), emailDTO.getSubject(),emailDTO.getBody());
+        senderService.sendEmail(emailDTO.getToEmail(), emailDTO.getSubject(), emailDTO.getBody());
         // no security is used for now
     }
+
     @PostMapping("/search")
-    public UserResponseDTO searchUserByUsername(@RequestParam String username){
-       return userMapper.mapUserToResponse(userService.search(username));
+    public UserResponseDTO searchUserByUsername(@RequestParam String username) {
+        return userMapper.mapUserToResponse(userService.search(username));
     }
 
     @GetMapping("/activate/{id}")
     @ApiResponse(code = 200, message = "User has been activated succesfully")
-    public void activateUser(@PathVariable int id){
+    public void activateUser(@PathVariable int id) {
         userService.activateUser(id);
     }
 
     @PostMapping("/upload")
-    public void uploadPhoto(@RequestParam("file") MultipartFile file){
+    public void uploadPhoto(@RequestParam("file") MultipartFile file) {
         uploadService.fileUpload(file);
+    }
+
+    @PostMapping("/update")
+    public void update(@RequestParam String firstName,
+                       @RequestParam String lastName) {
+        String usersName = SecurityContextHolder.getContext().getAuthentication().getName();
+        userService.updateUsersInfo(usersName, firstName,lastName);
     }
 }
