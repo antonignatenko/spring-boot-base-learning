@@ -2,9 +2,9 @@ package com.softkit;
 
 
 import com.softkit.exception.CustomException;
-import com.softkit.model.User;
+import com.softkit.controller.model.User;
 import com.softkit.repository.UserRepository;
-import com.softkit.service.UserService;
+import com.softkit.service.impl.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;

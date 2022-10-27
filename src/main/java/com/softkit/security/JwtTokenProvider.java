@@ -1,11 +1,8 @@
 package com.softkit.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import com.softkit.exception.CustomException;
-import com.softkit.model.Role;
+import com.softkit.controller.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -32,8 +29,11 @@ public class JwtTokenProvider {
     @Value("${security.jwt.token.secret-key:secret-key}")
     private String secretKey;
 
-    @Value("${security.jwt.token.expire-length:3600000}")
-    private final long validityInMilliseconds = 3600000;  // 1h
+    @Value("${security.jwt.token.expire-length}")
+    private long validityInMs;
+
+    @Value("${security.jwt.token.refresh-expire-length}")
+    private long refreshTokenValidityInMs;
 
     @Autowired
     private ProjectUserDetailsService myUserDetails;
@@ -49,12 +49,30 @@ public class JwtTokenProvider {
         claims.put("auth", roles.stream().map(s -> new SimpleGrantedAuthority(s.getAuthority())).collect(Collectors.toList()));
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + validityInMs);
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+    }
+
+    public String generateTokenFromUsername(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + refreshTokenValidityInMs)).signWith(SignatureAlgorithm.HS512, secretKey)
+                .compact();
+    }
+
+    public String doGenerateRefreshToken(String username, List<Role> roles) {
+        Claims claims = Jwts.claims().setSubject(username);
+        claims.put("auth", roles.stream().map(s -> new SimpleGrantedAuthority(s.getAuthority())).collect(Collectors.toList()));
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis() + refreshTokenValidityInMs))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
@@ -68,7 +86,7 @@ public class JwtTokenProvider {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public String resolveToken(HttpServletRequest req) {
+    public String extractJwtToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
@@ -80,7 +98,7 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (ExpiredJwtException | IllegalArgumentException e) {
             throw new CustomException("Expired or invalid JWT token", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

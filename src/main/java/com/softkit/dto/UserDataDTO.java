@@ -1,12 +1,11 @@
 package com.softkit.dto;
 
-import com.softkit.annotation.ValidPassword;
-import com.softkit.model.Role;
+import com.softkit.controller.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,10 +14,20 @@ import java.util.List;
 public class UserDataDTO {
 
     private String username;
-    @Email(message = "Email not valid")
+
     private String email;
-    @ValidPassword
+
     private String password;
+
+    private String firstName;
+
+    private String lastName;
+
+    private int birthDay;
+
+    private LocalDateTime registrationDate;
+
     private List<Role> roles;
 
+    private String UUID;
 }

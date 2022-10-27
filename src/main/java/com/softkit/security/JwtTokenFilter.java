@@ -19,10 +19,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
-
+  // change logic of validation
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        String token = jwtTokenProvider.resolveToken(httpServletRequest);
+    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        String token = jwtTokenProvider.extractJwtToken(httpServletRequest);
         try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 Authentication auth = jwtTokenProvider.getAuthentication(token);

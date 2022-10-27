@@ -1,13 +1,15 @@
 package com.softkit;
 
 import com.softkit.exception.CustomException;
-import com.softkit.model.User;
-import com.softkit.service.UserService;
+import com.softkit.controller.model.User;
+import com.softkit.service.impl.UserService;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -27,7 +29,7 @@ public class UserServiceTests {
     @Test
     public void successUserSignupTest() {
         String signupToken1 = userService.signup(new User(null, "test", "test", "test",
-                Lists.newArrayList()));
+                Lists.newArrayList(), LocalDateTime.now(),));
 
         assertThat(signupToken1).isNotBlank();
 

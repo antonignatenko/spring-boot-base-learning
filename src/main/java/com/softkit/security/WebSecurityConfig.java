@@ -3,6 +3,7 @@ package com.softkit.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -26,7 +27,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -36,7 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             }
         };
     }
-    
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -52,6 +52,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/users/signin").permitAll()
                 .antMatchers("/users/signup").permitAll()
+                .antMatchers("/users/confirm-account").permitAll()
+                .antMatchers("/users/update/firstname").permitAll()
                 .antMatchers("/h2-console/**/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Disallow everything else..
@@ -64,7 +66,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
 
         // Optional, if you want to test the API from a browser
-        // http.httpBasic();
+        http.httpBasic();
     }
 
     @Override

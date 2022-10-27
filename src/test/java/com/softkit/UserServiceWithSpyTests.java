@@ -1,7 +1,7 @@
 package com.softkit;
 
 import com.softkit.exception.CustomException;
-import com.softkit.service.UserService;
+import com.softkit.service.impl.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

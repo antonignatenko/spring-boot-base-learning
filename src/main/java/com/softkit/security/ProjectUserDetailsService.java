@@ -1,6 +1,6 @@
 package com.softkit.security;
 
-import com.softkit.model.User;
+import com.softkit.controller.model.User;
 import com.softkit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +16,7 @@ public class ProjectUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        final User user = userRepository.findByUsername(username);
+        final User user = userRepository.findByUsernameIgnoreCase(username);
 
         if (user == null) {
             throw new UsernameNotFoundException("User '" + username + "' not found");

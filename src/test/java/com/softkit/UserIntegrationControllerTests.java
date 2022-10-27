@@ -1,8 +1,8 @@
 package com.softkit;
 
 import com.softkit.dto.UserDataDTO;
-import com.softkit.dto.UserResponseDTO;
-import com.softkit.model.Role;
+import com.softkit.dto.response.UserResponseDTO;
+import com.softkit.controller.model.Role;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;

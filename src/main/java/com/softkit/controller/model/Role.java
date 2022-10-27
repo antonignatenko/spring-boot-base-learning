@@ -1,4 +1,4 @@
-package com.softkit.model;
+package com.softkit.controller.model;
 
 import org.springframework.security.core.GrantedAuthority;
 
